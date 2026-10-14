@@ -1,0 +1,34 @@
+# Python
+.venv/
+.venv*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+.env.local
+
+# Generated outputs
+outputs/
+output/
+notebooks/.ipynb_checkpoints/
+
+# Private data: never commit recordings, transcripts, scores or labels
+data/*
+!data/sample_manifest.csv
+artifacts/
+*.wav
+*.mp3
+*.mp4
+*.m4a
+*.webm
+*.npz
+*.parquet
+*.jsonl
+
+# Explicit rules the privacy tests check for
+data/private/
+artifacts/research/
+artifacts/models/

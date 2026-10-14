@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "presentation-assessment"
+version = "0.1.0"
+description = "Modular multimodal presentation assessment experiment pipeline."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "numpy>=1.26",
+  "PyYAML>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2",
+]
+speech = [
+  "faster-whisper>=1.2.1",
+]
+audio = [
+  "librosa>=0.11.0",
+]
+vision = [
+  "opencv-contrib-python>=4.10.0.84",
+  "mediapipe>=0.10.14",
+]
+real = [
+  "faster-whisper>=1.2.1",
+  "librosa>=0.11.0",
+  "opencv-contrib-python>=4.10.0.84",
+  "mediapipe>=0.10.14",
+]
+research = [
+  "jupyterlab>=4.4,<5",
+  "nbformat>=5.10,<6",
+  "nbclient>=0.10,<1",
+  "pandas>=2.3,<3",
+  "pyarrow>=21,<22",
+  "scikit-learn>=1.7,<2",
+  "scipy>=1.16,<2",
+  "matplotlib>=3.10,<4",
+  "seaborn>=0.13,<1",
+  "yt-dlp>=2025.8.22",
+  "pydantic>=2.11,<3",
+  "rfc8785>=0.1.4,<1",
+  "pyloudnorm>=0.1.1,<1",
+  "webrtcvad-wheels>=2.0.14,<3",
+  "nvidia-cublas-cu12==12.9.2.10; sys_platform == 'win32'",
+  "nvidia-cudnn-cu12==9.24.0.43; sys_platform == 'win32'",
+]
+llm = [
+  "openai>=1.93.0",
+]
+
+[project.scripts]
+presentation-assessment = "presentation_assessment.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

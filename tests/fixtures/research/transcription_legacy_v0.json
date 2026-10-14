@@ -1,0 +1,37 @@
+{
+  "text": "Historical synthetic transcript.",
+  "language": "en",
+  "language_probability": 0.875,
+  "duration_s": 2.5,
+  "model_size": "large-v3",
+  "segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 2.5,
+      "text": "Historical synthetic transcript.",
+      "avg_logprob": -0.2,
+      "no_speech_prob": 0.01,
+      "words": [
+        {
+          "word": "Historical",
+          "start": 0.0,
+          "end": 0.75,
+          "probability": 0.95
+        },
+        {
+          "word": "synthetic",
+          "start": 0.8,
+          "end": 1.55,
+          "probability": 0.94
+        },
+        {
+          "word": "transcript.",
+          "start": 1.6,
+          "end": 2.5,
+          "probability": 0.93
+        }
+      ]
+    }
+  ]
+}

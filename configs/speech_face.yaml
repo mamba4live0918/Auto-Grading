@@ -1,0 +1,16 @@
+experiment_name: speech_face
+active_dimensions:
+  content: true
+  speech_delivery: true
+  visual_engagement: true
+  gesture_posture: false
+weights:
+  content: 0.45
+  speech_delivery: 0.30
+  visual_engagement: 0.25
+  gesture_posture: 0.00
+scoring:
+  min_score: 0
+  max_score: 100
+  neutral_score: 60
+  missing_modality_policy: neutral

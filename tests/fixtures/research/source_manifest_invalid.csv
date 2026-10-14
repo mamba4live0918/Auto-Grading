@@ -1,0 +1,2 @@
+source_row_id,source_page,sample_id,legacy_sample_id,source_url,video_id,video_title,total_score,score_status,source_course,verification_status,verification_note
+r1,1,,,https://videos.example.invalid/watch?v=example001,example001,Redacted example,82,not_available,,verified,score must be blank

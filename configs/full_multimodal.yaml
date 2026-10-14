@@ -1,0 +1,16 @@
+experiment_name: full_multimodal
+active_dimensions:
+  content: true
+  speech_delivery: true
+  visual_engagement: true
+  gesture_posture: true
+weights:
+  content: 0.35
+  speech_delivery: 0.25
+  visual_engagement: 0.20
+  gesture_posture: 0.20
+scoring:
+  min_score: 0
+  max_score: 100
+  neutral_score: 60
+  missing_modality_policy: neutral

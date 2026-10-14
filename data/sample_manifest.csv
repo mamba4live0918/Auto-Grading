@@ -1,0 +1,6 @@
+sample_id,video_path,transcript_path,human_score,speech_delivery_score,visual_engagement_score,gesture_posture_score
+p001,data/videos/p001.mp4,data/transcripts/p001.txt,82,80,78,75
+p002,data/videos/p002.mp4,data/transcripts/p002.txt,68,63,64,61
+p003,data/videos/p003.mp4,data/transcripts/p003.txt,90,87,88,86
+p004,data/videos/p004.mp4,data/transcripts/p004.txt,55,54,52,58
+p005,data/videos/p005.mp4,data/transcripts/p005.txt,74,73,70,72

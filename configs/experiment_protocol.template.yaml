@@ -1,0 +1,108 @@
+schema_version: 1
+protocol_name: thesis_frozen_dataset_experiment_v1
+random_seed: 20260813
+research_question: How do frozen, auditable acoustic delivery features describe and exploratorily predict advisor total presentation scores without making causal, rubric-level, or speaker-independent claims unsupported by the available labels?
+target:
+  name: total_score
+  label_source: advisor_total_score
+  scale_min: 0.0
+  scale_max: 100.0
+  semantics: Advisor-provided overall presentation score on the source 0-100 scale; it is not a rubric-dimension label or an acoustic-delivery ground truth.
+  observed_score_status: observed
+  exploratory: true
+  rubric_level_enabled: false
+limitations:
+  speaker_identity_status: not_reliably_available
+  unknown_speaker_policy: retain_and_report_limitation
+  prohibited_inference:
+    - causal_effect_of_delivery_on_score
+    - speaker_independent_generalisation
+    - rubric_dimension_prediction
+    - personality_or_sensitive_attribute_inference
+split:
+  strategy: nested_grouped_cross_validation
+  group_fields: [speaker_id, talk_id]
+  deduplicate_by: [source_sha256, video_id]
+  outer_method: group_kfold
+  outer_folds: 5
+  inner_method: group_kfold
+  inner_folds: 4
+  insufficient_group_fallback: leave_one_group_out
+  no_independent_holdout_claim: true
+  preprocessing_fit_scope: training_fold_only
+  score_unavailable_policy: unsupervised_only
+clustering:
+  feature_registry: audio_feature_registry.v1.yaml
+  primary_features:
+    - speech_ratio
+    - internal_pauses_per_speech_minute
+    - internal_pause_duration_median_seconds
+    - speech_segment_duration_median_seconds
+    - acoustic_envelope_peaks_per_speech_minute
+    - envelope_peak_interval_cv
+    - pitch_p10_p90_range_semitones
+    - pitch_std_semitones
+    - rms_robust_cv
+    - spectral_flux_dispersion
+    - candidate_transients_per_speech_minute
+  conditional_feature: asr_units_per_speech_minute
+  conditional_feature_rule: all_successful_samples_share_whisper_language
+  missing_value_imputation: batch_median
+  missing_indicators: audit_only
+  scaler: median_iqr_robust
+  outlier_policy: flag_without_removal_or_winsorization
+  pca_components: 2
+  distance: euclidean
+  similarity_scale: median_nonzero_distance_rbf
+  linkage: ward
+  candidate_cluster_counts: [2, 3, 4, 5]
+  cluster_selection_metric: silhouette
+  smaller_cluster_tolerance: 0.05
+  sensitivity_analysis: leave_one_feature_out_adjusted_rand_index
+composite:
+  name: exploratory_delivery_composite
+  interpretation: fixed_expert_exploratory
+  transform: training_fold_robust_z
+  aggregation: signed_weighted_mean
+  components:
+    - {feature: speech_ratio, direction: 1, weight: 0.09090909090909091}
+    - {feature: internal_pauses_per_speech_minute, direction: -1, weight: 0.09090909090909091}
+    - {feature: internal_pause_duration_median_seconds, direction: -1, weight: 0.09090909090909091}
+    - {feature: speech_segment_duration_median_seconds, direction: 1, weight: 0.09090909090909091}
+    - {feature: acoustic_envelope_peaks_per_speech_minute, direction: 1, weight: 0.09090909090909091}
+    - {feature: envelope_peak_interval_cv, direction: -1, weight: 0.09090909090909091}
+    - {feature: pitch_p10_p90_range_semitones, direction: 1, weight: 0.09090909090909091}
+    - {feature: pitch_std_semitones, direction: 1, weight: 0.09090909090909091}
+    - {feature: rms_robust_cv, direction: 1, weight: 0.09090909090909091}
+    - {feature: spectral_flux_dispersion, direction: 1, weight: 0.09090909090909091}
+    - {feature: candidate_transients_per_speech_minute, direction: -1, weight: 0.09090909090909091}
+evaluation:
+  baselines: [training_mean, ridge, elastic_net]
+  primary_metric: mae
+  secondary_metrics: [rmse, spearman, pearson]
+  tuning_scope: grouped_training_folds_only
+  report_sample_counts_and_exclusions: true
+uncertainty:
+  resampling_unit: speaker_or_talk_group
+  bootstrap_method: paired_group_bootstrap
+  bootstrap_replicates: 5000
+  confidence_level: 0.95
+  interval_method: percentile
+  degenerate_interval_policy: not_estimable_with_reason
+  cluster_permutation_unit: group_level_labels
+  permutation_replicates: 10000
+  multiple_comparison_correction: holm
+qwen:
+  enabled: false
+  status: not_run
+  reason: No exact local Qwen model digest, frozen rubric, and versioned prompt are declared in this protocol; transcript scoring is therefore disabled rather than represented by placeholders.
+  retry_count_if_enabled_by_future_protocol: 1
+qlora:
+  enabled: false
+  status: not_run
+  formal_effectiveness_claim_allowed: false
+  smoke_test_interpretation: method_feasibility_only
+  reasons:
+    - Matching human rubric labels and evidence annotations are unavailable.
+    - A justified formal-training sample size and verified speaker-disjoint frozen split are not established.
+    - A frozen Qwen model digest, LoRA configuration, training budget, and successful 12 GB VRAM preflight are not declared.

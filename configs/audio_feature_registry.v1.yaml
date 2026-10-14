@@ -1,0 +1,812 @@
+schema_version: 1
+specification: audio submission feature map v1
+features:
+  - name: duration_seconds
+    family: recording_quality
+    unit: seconds
+    source_representation: source_audio_metadata
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Decoded source duration in seconds.
+    missing_policy: &required {allow_missing: false, reason_required: true, reason_codes: []}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: valid_sample_count
+    family: recording_quality
+    unit: samples
+    source_representation: analysis_wav
+    dtype: integer
+    minimum: 0
+    maximum: null
+    definition: Number of decodable PCM samples in analysis.wav.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: sample_rate_hz
+    family: recording_quality
+    unit: hz
+    source_representation: analysis_wav
+    dtype: integer
+    minimum: 1
+    maximum: null
+    definition: PCM sample rate of analysis.wav.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: channel_count
+    family: recording_quality
+    unit: channels
+    source_representation: source_audio_metadata
+    dtype: integer
+    minimum: 1
+    maximum: null
+    definition: Channel count of the decoded source before mono analysis conversion.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: integrated_loudness_lufs
+    family: recording_quality
+    unit: lufs
+    source_representation: analysis_wav
+    dtype: float
+    minimum: null
+    maximum: null
+    definition: EBU R128 integrated loudness of analysis.wav.
+    missing_policy: &signal_nullable {allow_missing: true, reason_required: true, reason_codes: [silent_audio, insufficient_duration, measurement_failed]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: loudness_range_lu
+    family: recording_quality
+    unit: loudness_units
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: EBU R128 loudness range of analysis.wav.
+    missing_policy: *signal_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: true_peak_dbtp
+    family: recording_quality
+    unit: dbtp
+    source_representation: analysis_wav
+    dtype: float
+    minimum: null
+    maximum: null
+    definition: Reconstructed inter-sample true peak in dBTP.
+    missing_policy: *signal_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: sample_peak_amplitude
+    family: recording_quality
+    unit: full_scale_amplitude
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Maximum absolute PCM sample amplitude relative to full scale.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: rms_amplitude
+    family: recording_quality
+    unit: full_scale_amplitude
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Root-mean-square PCM amplitude relative to full scale.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: dc_offset_amplitude
+    family: recording_quality
+    unit: full_scale_amplitude
+    source_representation: analysis_wav
+    dtype: float
+    minimum: -1.0
+    maximum: 1.0
+    definition: Arithmetic mean of signed PCM samples relative to full scale.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: clipped_sample_ratio
+    family: recording_quality
+    unit: proportion
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Proportion of samples at the declared clipping threshold.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: noise_floor_dbfs
+    family: recording_quality
+    unit: dbfs
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: null
+    maximum: 0.0
+    definition: Robust non-speech-frame noise-floor estimate in dBFS.
+    missing_policy: &vad_nullable {allow_missing: true, reason_required: true, reason_codes: [no_non_speech_frames, insufficient_frames, measurement_failed]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: robust_snr_db
+    family: recording_quality
+    unit: decibels
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: null
+    maximum: null
+    definition: Robust difference between speech signal level and estimated noise floor.
+    missing_policy: *vad_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: quality_is_silent
+    family: recording_quality
+    unit: boolean
+    source_representation: analysis_wav
+    dtype: boolean
+    minimum: null
+    maximum: null
+    definition: True when no usable signal exceeds the frozen silence criterion.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: quality_is_too_short
+    family: recording_quality
+    unit: boolean
+    source_representation: analysis_wav
+    dtype: boolean
+    minimum: null
+    maximum: null
+    definition: True when decoded duration is shorter than 3 seconds.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: quality_is_severely_clipped
+    family: recording_quality
+    unit: boolean
+    source_representation: analysis_wav
+    dtype: boolean
+    minimum: null
+    maximum: null
+    definition: True when clipped_sample_ratio exceeds 0.01.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: quality_is_low_snr
+    family: recording_quality
+    unit: boolean
+    source_representation: analysis_wav_and_vad
+    dtype: boolean
+    minimum: null
+    maximum: null
+    definition: True when robust_snr_db is below 10 dB; unavailable SNR remains separately missing.
+    missing_policy: *vad_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+
+  - name: speech_duration_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Sum of all detected speech-segment durations.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: non_speech_duration_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Decoded duration minus detected speech duration.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: speech_ratio
+    family: vad_pause
+    unit: proportion
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Speech duration divided by decoded recording duration.
+    missing_policy: *required
+    clustering_role: primary
+    warning_threshold: null
+  - name: pause_ratio
+    family: vad_pause
+    unit: proportion
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Non-speech duration divided by decoded recording duration.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: speech_segment_count
+    family: vad_pause
+    unit: count
+    source_representation: analysis_wav_and_vad
+    dtype: integer
+    minimum: 0
+    maximum: null
+    definition: Number of detected speech segments after VAD post-processing.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: speech_segments_per_recording_minute
+    family: vad_pause
+    unit: count_per_recording_minute
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Speech-segment count divided by decoded duration in minutes.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: speech_segments_per_speech_minute
+    family: vad_pause
+    unit: count_per_speech_minute
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Speech-segment count divided by detected speech duration in minutes.
+    missing_policy: &speech_denominator_nullable {allow_missing: true, reason_required: true, reason_codes: [vad_failed, no_speech_detected, zero_speech_duration]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: speech_segment_duration_median_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median duration of detected speech segments.
+    missing_policy: &segment_nullable {allow_missing: true, reason_required: true, reason_codes: [no_speech_segments, insufficient_segments]}
+    clustering_role: primary
+    warning_threshold: null
+  - name: speech_segment_duration_mean_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Arithmetic mean duration of detected speech segments.
+    missing_policy: *segment_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: speech_segment_duration_p90_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: 90th percentile duration of detected speech segments.
+    missing_policy: *segment_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: speech_segment_duration_max_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum duration of detected speech segments.
+    missing_policy: *segment_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: internal_pause_count
+    family: vad_pause
+    unit: count
+    source_representation: analysis_wav_and_vad
+    dtype: integer
+    minimum: 0
+    maximum: null
+    definition: Number of non-speech intervals bounded on both sides by speech; leading and trailing silence are excluded.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: internal_pauses_per_recording_minute
+    family: vad_pause
+    unit: count_per_recording_minute
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Internal-pause count divided by decoded duration in minutes.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: internal_pauses_per_speech_minute
+    family: vad_pause
+    unit: count_per_speech_minute
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Internal-pause count divided by detected speech duration in minutes.
+    missing_policy: *speech_denominator_nullable
+    clustering_role: primary
+    warning_threshold: null
+  - name: internal_pause_duration_median_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median duration of internal pauses, excluding leading and trailing non-speech.
+    missing_policy: &pause_nullable {allow_missing: true, reason_required: true, reason_codes: [no_internal_pauses, insufficient_pauses]}
+    clustering_role: primary
+    warning_threshold: null
+  - name: internal_pause_duration_mean_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Arithmetic mean duration of internal pauses.
+    missing_policy: *pause_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: internal_pause_duration_p90_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: 90th percentile duration of internal pauses.
+    missing_policy: *pause_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: internal_pause_duration_max_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum duration of internal pauses.
+    missing_policy: *pause_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: leading_non_speech_duration_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Non-speech duration before the first detected speech segment.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: trailing_non_speech_duration_seconds
+    family: vad_pause
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Non-speech duration after the last detected speech segment.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+
+  - name: asr_language_unit_count
+    family: rhythm
+    unit: language_units
+    source_representation: analysis_wav_and_asr
+    dtype: integer
+    minimum: 0
+    maximum: null
+    definition: Timestamped non-punctuation ASR units, using words for whitespace languages and timestamped units for continuously written languages.
+    missing_policy: &asr_nullable {allow_missing: true, reason_required: true, reason_codes: [empty_asr, missing_word_timestamps, unsupported_language_unitization]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: asr_units_per_recording_minute
+    family: rhythm
+    unit: language_units_per_recording_minute
+    source_representation: analysis_wav_and_asr
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: ASR language-unit count divided by decoded duration in minutes.
+    missing_policy: *asr_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: asr_units_per_speech_minute
+    family: rhythm
+    unit: language_units_per_speech_minute
+    source_representation: analysis_wav_vad_and_asr
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: ASR language-unit count divided by speech duration; eligible for clustering only when all successful samples share one Whisper language code.
+    missing_policy: {allow_missing: true, reason_required: true, reason_codes: [empty_asr, missing_word_timestamps, unsupported_language_unitization, vad_failed, no_speech_detected, zero_speech_duration]}
+    clustering_role: conditional_same_language
+    warning_threshold: null
+  - name: acoustic_envelope_peaks_per_recording_minute
+    family: rhythm
+    unit: peaks_per_recording_minute
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Robust acoustic-envelope peak count divided by decoded duration in minutes as a cross-language syllabic-nucleus proxy.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: acoustic_envelope_peaks_per_speech_minute
+    family: rhythm
+    unit: peaks_per_speech_minute
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Robust acoustic-envelope peak count divided by detected speech duration in minutes.
+    missing_policy: *speech_denominator_nullable
+    clustering_role: primary
+    warning_threshold: null
+  - name: envelope_peak_interval_median_seconds
+    family: rhythm
+    unit: seconds
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median interval between adjacent acoustic-envelope peaks.
+    missing_policy: &peak_nullable {allow_missing: true, reason_required: true, reason_codes: [fewer_than_two_envelope_peaks, envelope_detection_failed]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: envelope_peak_interval_cv
+    family: rhythm
+    unit: ratio
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Standard deviation divided by mean for adjacent acoustic-envelope peak intervals.
+    missing_policy: *peak_nullable
+    clustering_role: primary
+    warning_threshold: null
+  - name: speech_segment_onset_interval_median_seconds
+    family: rhythm
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median interval between successive detected speech-segment onset times.
+    missing_policy: *segment_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: continuous_speech_run_duration_median_seconds
+    family: rhythm
+    unit: seconds
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median duration of continuous speech runs after VAD post-processing.
+    missing_policy: *segment_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+
+  - name: voiced_frame_ratio
+    family: prosody
+    unit: proportion
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Proportion of pitch-analysis frames passing voiced detection and the plausible human-voice range.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: pitch_median_hz
+    family: prosody
+    unit: hz
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median fundamental frequency across valid voiced frames.
+    missing_policy: &pitch_nullable {allow_missing: true, reason_required: true, reason_codes: [insufficient_voiced_frames, pitch_estimation_failed]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: pitch_p10_p90_range_hz
+    family: prosody
+    unit: hz
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Difference between the 90th and 10th percentiles of valid voiced-frame fundamental frequency.
+    missing_policy: *pitch_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: pitch_p10_p90_range_semitones
+    family: prosody
+    unit: semitones
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Fundamental-frequency 10th-to-90th percentile range expressed as 12*log2(p90/p10).
+    missing_policy: *pitch_nullable
+    clustering_role: primary
+    warning_threshold: null
+  - name: pitch_iqr_hz
+    family: prosody
+    unit: hz
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Interquartile range of valid voiced-frame fundamental frequency.
+    missing_policy: *pitch_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: pitch_std_semitones
+    family: prosody
+    unit: semitones
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Standard deviation after expressing voiced-frame pitch in semitones relative to its median.
+    missing_policy: *pitch_nullable
+    clustering_role: primary
+    warning_threshold: null
+  - name: rms_energy_median
+    family: prosody
+    unit: full_scale_amplitude
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Median short-time RMS energy across analysis frames.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: rms_energy_iqr
+    family: prosody
+    unit: full_scale_amplitude
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Interquartile range of short-time RMS energy.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: rms_robust_cv
+    family: prosody
+    unit: ratio
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: RMS interquartile range divided by the RMS median, with zero-median results kept missing rather than imputed as zero.
+    missing_policy: &energy_nullable {allow_missing: true, reason_required: true, reason_codes: [zero_median_energy, insufficient_frames]}
+    clustering_role: primary
+    warning_threshold: null
+
+  - name: spectral_centroid_median_hz
+    family: spectral
+    unit: hz
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median magnitude-weighted spectral centroid across analysis frames.
+    missing_policy: &spectral_nullable {allow_missing: true, reason_required: true, reason_codes: [no_valid_spectral_frames, insufficient_frames]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: spectral_flux_median
+    family: spectral
+    unit: normalized_flux
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median positive frame-to-frame change in normalized magnitude spectra.
+    missing_policy: *spectral_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: spectral_flux_dispersion
+    family: spectral
+    unit: normalized_flux
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Interquartile range of positive frame-to-frame normalized spectral flux.
+    missing_policy: *spectral_nullable
+    clustering_role: primary
+    warning_threshold: null
+
+  - name: candidate_transient_count
+    family: transient
+    unit: count
+    source_representation: analysis_wav
+    dtype: integer
+    minimum: 0
+    maximum: null
+    definition: Count after merging candidate frames within 80 ms; each event requires energy-derivative robust z at least 4.0 plus low-frequency-ratio or spectral-flux robust z at least 2.5.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: candidate_transients_per_recording_minute
+    family: transient
+    unit: count_per_recording_minute
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Candidate-transient count divided by decoded duration in minutes.
+    missing_policy: *required
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: candidate_transients_per_speech_minute
+    family: transient
+    unit: count_per_speech_minute
+    source_representation: analysis_wav_and_vad
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Candidate-transient count divided by detected speech duration in minutes; events are candidates, not confirmed phonemes.
+    missing_policy: *speech_denominator_nullable
+    clustering_role: primary
+    warning_threshold: null
+  - name: candidate_transient_intensity_median
+    family: transient
+    unit: robust_z
+    source_representation: analysis_wav
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Median energy-derivative robust z score across retained candidate transient events.
+    missing_policy: &event_nullable {allow_missing: true, reason_required: true, reason_codes: [no_candidate_transients]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: candidate_transient_confidence_level
+    family: transient
+    unit: category
+    source_representation: analysis_wav
+    dtype: string
+    minimum: null
+    maximum: null
+    definition: Detection confidence category; high requires energy, low-frequency, and flux criteria, while medium requires energy and either auxiliary criterion.
+    missing_policy: *event_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+
+  - name: stability_speech_ratio_absolute_difference
+    family: normalization_stability
+    unit: proportion_points
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Maximum absolute speech-ratio difference between analysis.wav and either normalized derivative; warning above 0.02.
+    missing_policy: &stability_nullable {allow_missing: true, reason_required: true, reason_codes: [base_feature_missing, normalized_derivative_unavailable, comparison_failed]}
+    clustering_role: audit_only
+    warning_threshold: 0.02
+  - name: stability_speech_ratio_relative_difference
+    family: normalization_stability
+    unit: proportion
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum absolute speech-ratio difference relative to the analysis.wav value; reported for audit but the absolute tolerance controls review.
+    missing_policy: *stability_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: stability_pause_ratio_absolute_difference
+    family: normalization_stability
+    unit: proportion_points
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: 1.0
+    definition: Maximum absolute pause-ratio difference between analysis.wav and either normalized derivative; warning above 0.02.
+    missing_policy: *stability_nullable
+    clustering_role: audit_only
+    warning_threshold: 0.02
+  - name: stability_pause_ratio_relative_difference
+    family: normalization_stability
+    unit: proportion
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum absolute pause-ratio difference relative to the analysis.wav value; reported for audit but the absolute tolerance controls review.
+    missing_policy: *stability_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: stability_acoustic_envelope_peak_rate_absolute_difference
+    family: normalization_stability
+    unit: peaks_per_speech_minute
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum absolute difference in acoustic-envelope peaks per speech minute between analysis.wav and either normalized derivative.
+    missing_policy: &stability_speech_denominator_nullable {allow_missing: true, reason_required: true, reason_codes: [base_feature_missing, normalized_derivative_unavailable, comparison_failed, vad_failed, no_speech_detected, zero_speech_duration]}
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: stability_acoustic_envelope_peak_rate_relative_difference
+    family: normalization_stability
+    unit: proportion
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum relative difference in acoustic-envelope peak rate; warning above 0.10.
+    missing_policy: *stability_speech_denominator_nullable
+    clustering_role: audit_only
+    warning_threshold: 0.10
+  - name: stability_pitch_p10_p90_range_semitones_absolute_difference
+    family: normalization_stability
+    unit: semitones
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum absolute difference in pitch 10th-to-90th percentile semitone range; warning above 0.5 semitones.
+    missing_policy: *stability_nullable
+    clustering_role: audit_only
+    warning_threshold: 0.5
+  - name: stability_pitch_p10_p90_range_semitones_relative_difference
+    family: normalization_stability
+    unit: proportion
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum relative difference in pitch 10th-to-90th percentile semitone range; reported for audit but the absolute tolerance controls review.
+    missing_policy: *stability_nullable
+    clustering_role: audit_only
+    warning_threshold: null
+  - name: stability_candidate_transient_rate_absolute_difference
+    family: normalization_stability
+    unit: count_per_speech_minute
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum absolute candidate-transient rate difference; when the base rate is below five per minute, warning above one per minute.
+    missing_policy: *stability_speech_denominator_nullable
+    clustering_role: audit_only
+    warning_threshold: 1.0
+  - name: stability_candidate_transient_rate_relative_difference
+    family: normalization_stability
+    unit: proportion
+    source_representation: all_wav_representations
+    dtype: float
+    minimum: 0.0
+    maximum: null
+    definition: Maximum relative candidate-transient rate difference; warning above 0.20 when the base rate is at least five per minute.
+    missing_policy: *stability_speech_denominator_nullable
+    clustering_role: audit_only
+    warning_threshold: 0.20

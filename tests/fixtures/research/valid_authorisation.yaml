@@ -1,0 +1,12 @@
+authorised_by: Research supervisor
+source: Advisor-provided presentation table
+purpose: Local thesis research
+data_scope:
+  - private_advisor_video_scores
+permitted_access:
+  - researcher
+storage: Encrypted local storage
+retention_until: 2026-12-31
+deletion_plan: Delete private inputs after retention ends
+ethics_status: user_authorised_local_research
+acknowledged_at: 2026-08-01T00:00:00+00:00

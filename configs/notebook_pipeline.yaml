@@ -1,0 +1,27 @@
+random_seed: 20260813
+source_manifest: data/private/advisor_video_scores.csv
+source_manifest_expected_counts:
+  total_rows: 85
+  observed_score_rows: 83
+  not_available_rows: 2
+data_authorisation: data/private/data_authorisation.yaml
+whisper_model: Systran/faster-whisper-large-v3
+whisper_revision: edaa852ec7e145841d8ffdb056a99866b5f0a478
+whisper_snapshot_sha256: ae1b67ef9f88f5cec7f51cdf198a163419c5a7529ae85c7ecac18d5cebd98511
+whisper_local_files_only: true
+whisper_device: cuda
+whisper_compute_type: float16
+whisper_beam_size: 5
+whisper_vad: true
+whisper_word_timestamps: true
+youtube_network_enabled: false
+research_artifact_root: artifacts/research
+model_artifact_root: artifacts/models
+execution_mode: SMOKE_MODE
+execution_modes:
+  default: SMOKE_MODE
+  permitted:
+    - SMOKE_MODE
+    - RESUME
+    - FORCE_STAGE
+    - FULL_RUN

@@ -1,0 +1,3 @@
+source_row_id,source_page,sample_id,legacy_sample_id,source_url,video_id,video_title,total_score,score_status,source_course,verification_status,verification_note
+r1,1,,,https://videos.example.invalid/watch?v=example001,example001,Redacted example one,81.5,observed,,verified,
+r2,1,,,https://videos.example.invalid/watch?v=example002,example002,Redacted example two,,not_available,,needs_review,score unavailable

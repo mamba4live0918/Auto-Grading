@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>语音边界标注</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>语音边界标注</h1>
+      <span>逐段听原声，记录可闻语音的起止时间</span>
+    </div>
+    <div class="top-actions">
+      <span class="local-pill">仅在本机保存</span>
+      <button id="exportTop" class="text-button" type="button">导出记录</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <div class="workspace">
+      <section class="panel audio-panel" aria-labelledby="clipTitle">
+        <div class="clip-heading">
+          <div>
+            <div class="stage-line"><span id="phaseLabel" class="stage-badge"></span><span id="progressText"></span></div>
+            <h2 id="clipTitle">正在载入片段…</h2>
+          </div>
+          <div class="nav-buttons">
+            <button id="previous" class="square-button" type="button" aria-label="上一段">‹</button>
+            <button id="next" class="square-button" type="button" aria-label="下一段">›</button>
+          </div>
+        </div>
+        <div class="progress-track" aria-label="标注进度"><div id="progressFill"></div></div>
+        <div class="wave-head"><span>原声波形 · 拖动选择范围</span><span>片段时长 30 秒</span></div>
+        <div id="waveWrap" class="wave-wrap"><canvas id="waveform" aria-label="音频波形，拖动可选择时间范围"></canvas></div>
+        <div class="audio-controls">
+          <button id="playPause" class="play-button" type="button" aria-label="播放或暂停">▶</button>
+          <span id="timeReadout" class="time-readout">00:00.00 / 00:30.00</span>
+          <input id="seek" type="range" min="0" max="30" step="0.01" value="0" aria-label="播放位置">
+          <select id="speed" aria-label="播放速度"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option></select>
+        </div>
+        <audio id="audio" preload="auto"></audio>
+        <div class="selection-bar">
+          <span id="selectionText">在波形上拖动，选取一段可闻语音</span>
+          <button id="addSpeech" class="outline-button" type="button" disabled>＋ 标为语音</button>
+          <button id="addUncertain" class="outline-button" type="button" disabled>＋ 标为不确定</button>
+        </div>
+      </section>
+
+      <section class="panel annotations-panel" aria-labelledby="annotationTitle">
+        <div class="section-heading"><h2 id="annotationTitle">本段标注</h2><span id="segmentCount">0 段</span></div>
+        <p class="subtle">每一行是一段可闻语音。时间可手动修改；听不清边界时选“不确定”，不要猜。</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>序号</th><th>开始（秒）</th><th>结束（秒）</th><th>判断</th><th>说明</th><th></th></tr></thead>
+            <tbody id="segmentsBody"><tr><td colspan="6" class="empty">尚未标出语音。可以播放后在波形上拖选。</td></tr></tbody>
+          </table>
+        </div>
+        <div class="clip-review-fields">
+          <label class="checkline"><input id="noSpeech" type="checkbox">我已听完，确认本段没有可闻语音</label>
+          <label class="checkline"><input id="difficult" type="checkbox">本段整体难以判断</label>
+          <label class="note-label">本段备注 <textarea id="clipNotes" rows="2" placeholder="例如：背景声较大、某处轻声难辨"></textarea></label>
+        </div>
+      </section>
+    </div>
+
+    <aside class="panel guide-panel">
+      <div class="guide-title"><h2>标注指南</h2><span id="saveState">未保存</span></div>
+      <div id="stageGuide" class="guide-box"></div>
+      <h3>操作步骤</h3>
+      <ol class="steps">
+        <li>播放并仔细听完整段音频。</li>
+        <li>在波形上拖动，选出可闻语音的起止时间。</li>
+        <li>点击“标为语音”或“标为不确定”，必要时调整时间。</li>
+        <li>标完后点“完成本段并下一段”。</li>
+      </ol>
+      <h3>D 阶段：你的判断规则</h3>
+      <p class="subtle">写下轻声、呼吸、咳嗽、背景声、短词与不确定边界的处理原则。进入 A 阶段后规则会锁定。</p>
+      <textarea id="rules" class="rules-input" rows="8" placeholder="例如：只标出可闻的人声；呼吸单独不算语音；边界无法确认时标为不确定，并写下原因……"></textarea>
+      <button id="freeze" class="freeze-button" type="button" hidden>固定规则，开始 A 阶段</button>
+      <div class="hint-box">这轮记录的是<strong>可闻语音边界</strong>，不是表达质量分数。不会显示老师分数、模型预测或自动边界。</div>
+      <div class="annotator-box"><label for="annotator">标注者编号</label><input id="annotator" maxlength="64" spellcheck="false" placeholder="student_1"></div>
+    </aside>
+  </main>
+
+  <footer class="bottom-bar">
+    <span id="footerStatus">载入中…</span>
+    <div class="footer-actions">
+      <button id="exportBottom" class="outline-button" type="button">导出 CSV 记录</button>
+      <button id="completeNext" class="primary-button" type="button">完成本段并下一段 <span aria-hidden="true">→</span></button>
+    </div>
+  </footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
